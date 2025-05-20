@@ -60,24 +60,48 @@ async def get_movie_detail(douban_id: str):
         # 获取基本信息
         info_section = soup.find(id="info")
         if info_section:
-            for span in info_section.find_all("span", class_="pl"):
-                key = span.get_text(strip=True).replace(":", "")
-                value = span.next_sibling.strip() if span.next_sibling else ""
-                info[key] = value
+            # 获取所有基本信息项
+            for item in info_section.get_text().split("\n"):
+                item = item.strip()
+                if ":" in item:
+                    key, value = item.split(":", 1)
+                    key = key.strip()
+                    value = value.strip()
+                    if key and value:
+                        info[key] = value
+            
+            # 特殊处理导演、编剧、主演（因为这些可能有多个值）
+            for role in ["导演", "编剧", "主演"]:
+                role_span = info_section.find("span", string=role)
+                if role_span:
+                    next_span = role_span.find_next_sibling("span")
+                    if next_span and next_span.get("class") == ["attrs"]:
+                        names = [a.get_text(strip=True) for a in next_span.find_all("a")]
+                        info[role] = " / ".join(names)
+        
+        # 获取类型信息
+        genres = soup.find_all("span", property="v:genre")
+        if genres:
+            info["类型"] = " / ".join([g.get_text(strip=True) for g in genres])
         
         # 获取简介
         summary = soup.find(property="v:summary")
-        info["summary"] = summary.get_text(strip=True) if summary else "无简介"
+        if summary:
+            info["简介"] = summary.get_text(strip=True)
+        else:
+            info["简介"] = "无简介"
         
         # 获取海报
         poster = soup.select_one("#mainpic img")
-        info["poster_url"] = poster["src"] if poster else None
+        info["海报链接"] = poster["src"] if poster else None
+        
+        # 打印调试信息
+        logger.info(f"获取到的电影信息: {info}")
         
         return info
     except Exception as e:
         logger.error(f"获取电影详情时出错: {e}")
         return {"error": str(e)}
-
 async def analyze_rating(rating: str):
     """分析电影评分"""
     try:
@@ -149,6 +173,7 @@ async def main():
         print("4. 推荐相似电影")
         print("0. 退出")
         print("=====================")
+        2
         
         choice = input("请选择功能 (0-4): ")
         
