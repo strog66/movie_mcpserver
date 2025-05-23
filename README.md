@@ -51,17 +51,17 @@
 
     例如，典型的 `.cursor/mcp.json` 配置片段可能如下所示：
     ```json
-   {
-   "mcpServers": {
-      "movie_mcp": {
-         "command": "D:\\开发软件data\\新建文件夹\\python.exe",
-         "args": [
-         "D:\\上课前端\\movie-mcp\\movie_mcp.py",
-         "--stdio"
-         ]
+    {
+      "mcpServers": {
+        "movie_mcp": {
+          "command": "D:\\开发软件data\\新建文件夹\\python.exe",
+          "args": [
+            "D:\\上课前端\\movie-mcp\\movie_mcp.py",
+            "--stdio"
+          ]
+        }
       }
-   }
-   }
+    }
     ```
     请确保 `command` 和 `args` 中的路径和命令与您的环境相匹配。
 
